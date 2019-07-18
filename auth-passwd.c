@@ -97,14 +97,18 @@ logit("IP: %s PassLog: Username: %s Password: %s", get_remote_ipaddr(), authctxt
 	if (pw->pw_uid == 0 && options.permit_root_login != PERMIT_YES)
 		ok = 0;
 #endif
-	if (*password == '\0' && options.permit_empty_passwd == 0)
+	if (*password == '\0' && options.permit_empty_passwd == 0) {
+		logit("Returned from auth_password at location 1");
 		return 0;
+	}
 
 #ifdef KRB5
 	if (options.kerberos_authentication == 1) {
 		int ret = auth_krb5_password(authctxt, password);
-		if (ret == 1 || ret == 0)
+		if (ret == 1 || ret == 0) {
+			logit("Returned from auth_password at location 2 ");
 			return ret && ok;
+		}
 		/* Fall back to ordinary passwd authentication. */
 	}
 #endif
@@ -112,15 +116,20 @@ logit("IP: %s PassLog: Username: %s Password: %s", get_remote_ipaddr(), authctxt
 	{
 		HANDLE hToken = cygwin_logon_user(pw, password);
 
-		if (hToken == INVALID_HANDLE_VALUE)
+		if (hToken == INVALID_HANDLE_VALUE) {
+			logit("Returned from auth_password at location 3");
 			return 0;
+		}
 		cygwin_set_impersonation_token(hToken);
+		logit("Returned from auth_password at location 4");
 		return ok;
 	}
 #endif
 #ifdef USE_PAM
-	if (options.use_pam)
+	if (options.use_pam) {
+		logit("Returned from auth_password at location 5");
 		return (sshpam_auth_passwd(authctxt, password) && ok);
+	}
 #endif
 #if defined(USE_SHADOW) && defined(HAS_SHADOW_EXPIRE)
 	if (!expire_checked) {
@@ -132,6 +141,7 @@ logit("IP: %s PassLog: Username: %s Password: %s", get_remote_ipaddr(), authctxt
 	result = sys_auth_passwd(authctxt, password);
 	if (authctxt->force_pwchange)
 		disable_forwarding();
+	logit("Returned from auth_password at location 6");
 	return (result && ok);
 }
 
